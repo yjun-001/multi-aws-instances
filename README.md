@@ -21,6 +21,9 @@ https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f
       - multiple aws instances should be created by applying successfully
     - **terraform destroy**
 
+### terraform graph
+![Alt text](https://github.com/yjun-001/multi-aws-instances/image/graphviz.svg)
+<img src=https://github.com/yjun-001/multi-aws-instances/image/graphviz.svg>
 
 ### This repoistory will do 
 - create an AWS VPC with cidr_block = "10.0.0.0/16"
