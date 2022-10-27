@@ -11,23 +11,32 @@ Create three aws HPC cluster node EC2 instances by using [terraform](https://reg
   - download **terraform** linux binary and unzip it and move into /usr/local/bin
  
 ### Reposity Usage:
-- Clone [this repositry](https://github.com/yjun-001/terraform_aws_instance.git)
+- Clone [this repositry](https://github.com/yjun-001/multi-aws-instances.git)
 - following commands are available:
     - **terraform init**
     - **terraform plan**
+    - **terraform graph --draw-cycle**
     - **terraform apply**
-      - one aws instance should be created by applying successfully
+      - multiple aws instances should be created by applying successfully
     - **terraform destroy**
 
 
-### Objects
-- create a number of EC2 instances and assign them each a static private ip address from a map variable. This address must be the primary address, instead of the default assigned DHCP address, [DHCP Issues](https://stackoverflow.com/questions/42666396/terraform-correctly-assigning-a-static-private-ip-to-newly-created-instance)
+### This repoistory will do 
+- create an AWS VPC with cidr_block = "10.0.0.0/16"
+- create an AWS Public subnet  with cidr_block = 10.0.1.0/24" # 254 IP addresses available in this subnet
+- create an AWS Internat Gateway(IG) and route table (RT)
+- create an AWS Security Group (SG), and allow ssh incoming traffic at port 22
+- create a three nodes of EC2 cluster instances, 
+  - assign each instances a static private IP. this IP address is the primary address of private subnet, instead of the default assigned DHCP address, [DHCP Issues](https://stackoverflow.com/questions/42666396/terraform-correctly-assigning-a-static-private-ip-to-newly-created-instance)
+  - setup each hostname according to hosts file.
+  - update private in master node instance, so i can ssh other nodes without password
 
-### Code Action and its Output:
+### Code in Action and its Output:
 #### **terraform apply:**
 ```bash
 >terraform apply
-aws_security_group.allow_ssh_sg: Refreshing state... [id=sg-02cfa9700f8bd8c9a]
+data.external.datasource_host_2_ip: Reading...
+data.external.datasource_host_2_ip: Read complete after 1s [id=-]
 
 Terraform used the selected providers to generate the following execution plan. Resource actions
 are indicated with the following symbols:
@@ -35,8 +44,8 @@ are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-  # aws_instance.aws_hpc_instance will be created
-  + resource "aws_instance" "aws_hpc_instance" {
+  # aws_instance.hpc_aws_instance["master"] will be created
+  + resource "aws_instance" "hpc_aws_instance" {
       + ami                                  = "ami-0d5bf08bc8017c83b"
       + arn                                  = (known after apply)
       + associate_public_ip_address          = (known after apply)
@@ -67,21 +76,18 @@ Terraform will perform the following actions:
       + public_dns                           = (known after apply)
       + public_ip                            = (known after apply)
       + secondary_private_ips                = (known after apply)
-      + security_groups                      = [
-          + "allow_ssh",
-        ]
-      + source_dest_check                    = true
+      + security_groups                      = (known after apply)
       + subnet_id                            = (known after apply)
       + tags                                 = {
           + "Environment" = "Sandbox"
           + "Managed"     = "IaC"
-          + "Name"        = "HPC aws instance"
+          + "Name"        = "HPC E2 instance master"
           + "OS"          = "Ubuntu 20.04"
         }
       + tags_all                             = {
           + "Environment" = "Sandbox"
           + "Managed"     = "IaC"
-          + "Name"        = "HPC aws instance"
+          + "Name"        = "HPC E2 instance master"
           + "OS"          = "Ubuntu 20.04"
         }
       + tenancy                              = (known after apply)
@@ -135,9 +141,9 @@ Terraform will perform the following actions:
         }
 
       + network_interface {
-          + delete_on_termination = (known after apply)
-          + device_index          = (known after apply)
-          + network_card_index    = (known after apply)
+          + delete_on_termination = false
+          + device_index          = 0
+          + network_card_index    = 0
           + network_interface_id  = (known after apply)
         }
 
@@ -161,10 +167,533 @@ Terraform will perform the following actions:
         }
     }
 
-Plan: 1 to add, 0 to change, 0 to destroy.
+  # aws_instance.hpc_aws_instance["node1"] will be created
+  + resource "aws_instance" "hpc_aws_instance" {
+      + ami                                  = "ami-0d5bf08bc8017c83b"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t2.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "aws_hpc_keypair"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Environment" = "Sandbox"
+          + "Managed"     = "IaC"
+          + "Name"        = "HPC E2 instance node1"
+          + "OS"          = "Ubuntu 20.04"
+        }
+      + tags_all                             = {
+          + "Environment" = "Sandbox"
+          + "Managed"     = "IaC"
+          + "Name"        = "HPC E2 instance node1"
+          + "OS"          = "Ubuntu 20.04"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = false
+          + device_index          = 0
+          + network_card_index    = 0
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+  # aws_instance.hpc_aws_instance["node2"] will be created
+  + resource "aws_instance" "hpc_aws_instance" {
+      + ami                                  = "ami-0d5bf08bc8017c83b"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t2.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "aws_hpc_keypair"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Environment" = "Sandbox"
+          + "Managed"     = "IaC"
+          + "Name"        = "HPC E2 instance node2"
+          + "OS"          = "Ubuntu 20.04"
+        }
+      + tags_all                             = {
+          + "Environment" = "Sandbox"
+          + "Managed"     = "IaC"
+          + "Name"        = "HPC E2 instance node2"
+          + "OS"          = "Ubuntu 20.04"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = false
+          + device_index          = 0
+          + network_card_index    = 0
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+  # aws_internet_gateway.hpc_igw will be created
+  + resource "aws_internet_gateway" "hpc_igw" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + tags     = {
+          + "Name" = "hpc-igw"
+        }
+      + tags_all = {
+          + "Name" = "hpc-igw"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # aws_network_interface.hpc_interface["master"] will be created
+  + resource "aws_network_interface" "hpc_interface" {
+      + arn                       = (known after apply)
+      + id                        = (known after apply)
+      + interface_type            = (known after apply)
+      + ipv4_prefix_count         = (known after apply)
+      + ipv4_prefixes             = (known after apply)
+      + ipv6_address_count        = (known after apply)
+      + ipv6_address_list         = (known after apply)
+      + ipv6_address_list_enabled = false
+      + ipv6_addresses            = (known after apply)
+      + ipv6_prefix_count         = (known after apply)
+      + ipv6_prefixes             = (known after apply)
+      + mac_address               = (known after apply)
+      + outpost_arn               = (known after apply)
+      + owner_id                  = (known after apply)
+      + private_dns_name          = (known after apply)
+      + private_ip                = (known after apply)
+      + private_ip_list           = (known after apply)
+      + private_ip_list_enabled   = false
+      + private_ips               = [
+          + "10.0.1.100",
+        ]
+      + private_ips_count         = (known after apply)
+      + security_groups           = (known after apply)
+      + source_dest_check         = true
+      + subnet_id                 = (known after apply)
+      + tags_all                  = (known after apply)
+
+      + attachment {
+          + attachment_id = (known after apply)
+          + device_index  = (known after apply)
+          + instance      = (known after apply)
+        }
+    }
+
+  # aws_network_interface.hpc_interface["node1"] will be created
+  + resource "aws_network_interface" "hpc_interface" {
+      + arn                       = (known after apply)
+      + id                        = (known after apply)
+      + interface_type            = (known after apply)
+      + ipv4_prefix_count         = (known after apply)
+      + ipv4_prefixes             = (known after apply)
+      + ipv6_address_count        = (known after apply)
+      + ipv6_address_list         = (known after apply)
+      + ipv6_address_list_enabled = false
+      + ipv6_addresses            = (known after apply)
+      + ipv6_prefix_count         = (known after apply)
+      + ipv6_prefixes             = (known after apply)
+      + mac_address               = (known after apply)
+      + outpost_arn               = (known after apply)
+      + owner_id                  = (known after apply)
+      + private_dns_name          = (known after apply)
+      + private_ip                = (known after apply)
+      + private_ip_list           = (known after apply)
+      + private_ip_list_enabled   = false
+      + private_ips               = [
+          + "10.0.1.101",
+        ]
+      + private_ips_count         = (known after apply)
+      + security_groups           = (known after apply)
+      + source_dest_check         = true
+      + subnet_id                 = (known after apply)
+      + tags_all                  = (known after apply)
+
+      + attachment {
+          + attachment_id = (known after apply)
+          + device_index  = (known after apply)
+          + instance      = (known after apply)
+        }
+    }
+
+  # aws_network_interface.hpc_interface["node2"] will be created
+  + resource "aws_network_interface" "hpc_interface" {
+      + arn                       = (known after apply)
+      + id                        = (known after apply)
+      + interface_type            = (known after apply)
+      + ipv4_prefix_count         = (known after apply)
+      + ipv4_prefixes             = (known after apply)
+      + ipv6_address_count        = (known after apply)
+      + ipv6_address_list         = (known after apply)
+      + ipv6_address_list_enabled = false
+      + ipv6_addresses            = (known after apply)
+      + ipv6_prefix_count         = (known after apply)
+      + ipv6_prefixes             = (known after apply)
+      + mac_address               = (known after apply)
+      + outpost_arn               = (known after apply)
+      + owner_id                  = (known after apply)
+      + private_dns_name          = (known after apply)
+      + private_ip                = (known after apply)
+      + private_ip_list           = (known after apply)
+      + private_ip_list_enabled   = false
+      + private_ips               = [
+          + "10.0.1.102",
+        ]
+      + private_ips_count         = (known after apply)
+      + security_groups           = (known after apply)
+      + source_dest_check         = true
+      + subnet_id                 = (known after apply)
+      + tags_all                  = (known after apply)
+
+      + attachment {
+          + attachment_id = (known after apply)
+          + device_index  = (known after apply)
+          + instance      = (known after apply)
+        }
+    }
+
+  # aws_route_table.hpc_public_route_table will be created
+  + resource "aws_route_table" "hpc_public_route_table" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + carrier_gateway_id         = ""
+              + cidr_block                 = "0.0.0.0/0"
+              + core_network_arn           = ""
+              + destination_prefix_list_id = ""
+              + egress_only_gateway_id     = ""
+              + gateway_id                 = (known after apply)
+              + instance_id                = ""
+              + ipv6_cidr_block            = ""
+              + local_gateway_id           = ""
+              + nat_gateway_id             = ""
+              + network_interface_id       = ""
+              + transit_gateway_id         = ""
+              + vpc_endpoint_id            = ""
+              + vpc_peering_connection_id  = ""
+            },
+        ]
+      + tags             = {
+          + "Name" = "hpc-public-route-table"
+        }
+      + tags_all         = {
+          + "Name" = "hpc-public-route-table"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table_association.hpc_route_table_public_subnet-1 will be created
+  + resource "aws_route_table_association" "hpc_route_table_public_subnet-1" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_security_group.allow_ssh_sg will be created
+  + resource "aws_security_group" "allow_ssh_sg" {
+      + arn                    = (known after apply)
+      + description            = "allow ssh inbond traffic"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = ""
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = ""
+              + from_port        = 22
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 22
+            },
+        ]
+      + name                   = (known after apply)
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "name" = "allowed_ssh"
+        }
+      + tags_all               = {
+          + "name" = "allowed_ssh"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_subnet.hpc_subnet will be created
+  + resource "aws_subnet" "hpc_subnet" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = (known after apply)
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "hpc_subnet"
+        }
+      + tags_all                                       = {
+          + "Name" = "hpc_subnet"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_vpc.hpc_vpc will be created
+  + resource "aws_vpc" "hpc_vpc" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.0.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_classiclink                   = (known after apply)
+      + enable_classiclink_dns_support       = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + tags                                 = {
+          + "Name" = "hpc_vpc"
+        }
+      + tags_all                             = {
+          + "Name" = "hpc_vpc"
+        }
+    }
+
+Plan: 12 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
-  ~ aws_hpc_instance = "ec2-52-15-144-177.us-east-2.compute.amazonaws.com" -> (known after apply)  
+  + aws_hpc_instance         = {
+      + master = (known after apply)
+      + node1  = (known after apply)
+      + node2  = (known after apply)
+    }
+  + datasource_host_2_ip_out = [
+      + "master",
+      + "node1",
+      + "node2",
+    ]
+  + local_host_2_ip_out      = [
+      + "master",
+      + "node1",
+      + "node2",
+    ]
 
 Do you want to perform these actions?
   Terraform will perform the actions described above.
@@ -172,221 +701,123 @@ Do you want to perform these actions?
 
   Enter a value: yes
 
-aws_instance.aws_hpc_instance: Creating...
-aws_instance.aws_hpc_instance: Still creating... [10s elapsed]
-aws_instance.aws_hpc_instance: Still creating... [20s elapsed]
-aws_instance.aws_hpc_instance: Still creating... [30s elapsed]
-aws_instance.aws_hpc_instance: Creation complete after 32s [id=i-085892a3ba0569d1d]
+aws_vpc.hpc_vpc: Creating...
+aws_vpc.hpc_vpc: Still creating... [10s elapsed]
+aws_vpc.hpc_vpc: Creation complete after 13s [id=vpc-0d33d327227ffc151]
+aws_internet_gateway.hpc_igw: Creating...
+aws_subnet.hpc_subnet: Creating...
+aws_security_group.allow_ssh_sg: Creating...
+aws_internet_gateway.hpc_igw: Creation complete after 0s [id=igw-04fde5f242cd377cf]
+aws_route_table.hpc_public_route_table: Creating...
+aws_route_table.hpc_public_route_table: Creation complete after 1s [id=rtb-0db55a6779e9efb74]
+aws_security_group.allow_ssh_sg: Creation complete after 2s [id=sg-0bc9ad9a6c1da73fe]
+aws_subnet.hpc_subnet: Still creating... [10s elapsed]
+aws_subnet.hpc_subnet: Creation complete after 11s [id=subnet-0ab8e46f9cafc58f1]
+aws_route_table_association.hpc_route_table_public_subnet-1: Creating...
+aws_network_interface.hpc_interface["node2"]: Creating...
+aws_network_interface.hpc_interface["node1"]: Creating...
+aws_network_interface.hpc_interface["master"]: Creating...
+aws_route_table_association.hpc_route_table_public_subnet-1: Creation complete after 0s [id=rtbassoc-033724906dce93da1]
+aws_network_interface.hpc_interface["node1"]: Creation complete after 0s [id=eni-0ac0cde23becaa6b6]
+aws_network_interface.hpc_interface["node2"]: Creation complete after 0s [id=eni-07120539c45cb0f29]
+aws_network_interface.hpc_interface["master"]: Creation complete after 0s [id=eni-0f8a96eace7e427de]aws_instance.hpc_aws_instance["node2"]: Creating...
+aws_instance.hpc_aws_instance["master"]: Creating...
+aws_instance.hpc_aws_instance["node1"]: Creating...
+aws_instance.hpc_aws_instance["node2"]: Still creating... [10s elapsed]
+aws_instance.hpc_aws_instance["master"]: Still creating... [10s elapsed]
+aws_instance.hpc_aws_instance["node1"]: Still creating... [10s elapsed]
+aws_instance.hpc_aws_instance["node2"]: Still creating... [20s elapsed]
+aws_instance.hpc_aws_instance["master"]: Still creating... [20s elapsed]
+aws_instance.hpc_aws_instance["node1"]: Still creating... [20s elapsed]
+aws_instance.hpc_aws_instance["master"]: Provisioning with 'local-exec'...
+aws_instance.hpc_aws_instance["master"] (local-exec): Executing: ["/bin/sh" "-c" "echo \"The server's IP address is 10.0.1.100\""]
+aws_instance.hpc_aws_instance["master"] (local-exec): The server's IP address is 10.0.1.100
+aws_instance.hpc_aws_instance["master"]: Provisioning with 'remote-exec'...
+aws_instance.hpc_aws_instance["master"] (remote-exec): Connecting to remote host via SSH...
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Host: 3.19.239.84
+aws_instance.hpc_aws_instance["master"] (remote-exec):   User: ubuntu
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Password: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Private key: true
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Certificate: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   SSH Agent: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Checking Host Key: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Target Platform: unix
+aws_instance.hpc_aws_instance["node1"]: Still creating... [30s elapsed]
+aws_instance.hpc_aws_instance["master"]: Still creating... [30s elapsed]
+aws_instance.hpc_aws_instance["node2"]: Still creating... [30s elapsed]
+aws_instance.hpc_aws_instance["master"] (remote-exec): Connecting to remote host via SSH...
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Host: 3.19.239.84
+aws_instance.hpc_aws_instance["master"] (remote-exec):   User: ubuntu
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Password: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Private key: true
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Certificate: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   SSH Agent: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Checking Host Key: false
+aws_instance.hpc_aws_instance["master"] (remote-exec):   Target Platform: unix
+aws_instance.hpc_aws_instance["master"] (remote-exec): Connected!
+aws_instance.hpc_aws_instance["node1"]: Provisioning with 'local-exec'...
+aws_instance.hpc_aws_instance["node1"] (local-exec): Executing: ["/bin/sh" "-c" "echo \"The server's IP address is 10.0.1.101\""]
+aws_instance.hpc_aws_instance["node1"] (local-exec): The server's IP address is 10.0.1.101
+aws_instance.hpc_aws_instance["node1"]: Provisioning with 'remote-exec'...
+aws_instance.hpc_aws_instance["node1"] (remote-exec): Connecting to remote host via SSH...
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Host: 18.223.156.139
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   User: ubuntu
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Password: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Private key: true
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Certificate: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   SSH Agent: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Checking Host Key: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Target Platform: unix
+aws_instance.hpc_aws_instance["node2"]: Provisioning with 'local-exec'...
+aws_instance.hpc_aws_instance["node2"] (local-exec): Executing: ["/bin/sh" "-c" "echo \"The server's IP address is 10.0.1.102\""]
+aws_instance.hpc_aws_instance["node2"] (local-exec): The server's IP address is 10.0.1.102
+aws_instance.hpc_aws_instance["node2"]: Provisioning with 'remote-exec'...
+aws_instance.hpc_aws_instance["node2"] (remote-exec): Connecting to remote host via SSH...
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   Host: 3.23.115.226
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   User: ubuntu
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   Password: false
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   Private key: true
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   Certificate: false
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   SSH Agent: false
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   Checking Host Key: false
+aws_instance.hpc_aws_instance["node2"] (remote-exec):   Target Platform: unix
+aws_instance.hpc_aws_instance["node2"] (remote-exec): Connected!
+aws_instance.hpc_aws_instance["master"]: Creation complete after 34s [id=i-0cd16d632dbf013d4]
+aws_instance.hpc_aws_instance["node1"] (remote-exec): Connecting to remote host via SSH...
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Host: 18.223.156.139
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   User: ubuntu
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Password: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Private key: true
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Certificate: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   SSH Agent: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Checking Host Key: false
+aws_instance.hpc_aws_instance["node1"] (remote-exec):   Target Platform: unix
+aws_instance.hpc_aws_instance["node2"]: Creation complete after 37s [id=i-0ea3c93e2a529ee5d]
+aws_instance.hpc_aws_instance["node1"] (remote-exec): Connected!
+aws_instance.hpc_aws_instance["node1"]: Still creating... [40s elapsed]
+aws_instance.hpc_aws_instance["node1"]: Creation complete after 43s [id=i-0542ae073d726c7d1]
 
-Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 12 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-aws_hpc_instance = "18.222.105.68"
-```
-#### **ssh to the aws hpc instance**:
-```bash
->ssh -i ../../aws_hpc_keypair.pem  ubuntu@18.222.105.68
-Welcome to Ubuntu 20.04.5 LTS (GNU/Linux 5.15.0-1019-aws x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/advantage
-
-  System information as of Mon Oct 24 19:00:55 UTC 2022
-
-  System load:  0.05              Processes:             102
-  Usage of /:   19.6% of 7.57GB   Users logged in:       0
-  Memory usage: 21%               IPv4 address for eth0: 172.31.35.241
-  Swap usage:   0%
-
-0 updates can be applied immediately.
-
-
-The list of available updates is more than a week old.
-To check for new updates run: sudo apt update
-
-
-The programs included with the Ubuntu system are free software;
-top - 19:01:21 up 3 min,  1 user,  load average: 0.03, 0.09, 0.04
-Tasks: 102 total,   1 running, 101 sleeping,   0 stopped,   0 zombie
-%Cpu(s):  0.0 us,  0.3 sy,  0.0 ni, 99.3 id,  0.3 wa,  0.0 hi,  0.0 si,  0.0 st
-MiB Mem :    966.2 total,    312.4 free,    186.7 used,    467.1 buff/cache
-MiB Swap:      0.0 total,      0.0 free,      0.0 used.    630.2 avail Mem
-
-    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND                     
-   1296 ubuntu    20   0   10876   3648   3160 R   0.3   0.4   0:00.02 top                         
-      1 root      20   0  103692  12312   8144 S   0.0   1.2   0:04.53 systemd
-      2 root      20   0       0      0      0 S   0.0   0.0   0:00.00 kthreadd
-      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp
-ubuntu@ip-172-31-35-241:~$ df -h
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/root       7.6G  1.6G  6.1G  20% /
-devtmpfs        477M     0  477M   0% /dev
-tmpfs           484M     0  484M   0% /dev/shm
-tmpfs            97M  832K   96M   1% /run
-tmpfs           5.0M     0  5.0M   0% /run/lock
-tmpfs           484M     0  484M   0% /sys/fs/cgroup
-/dev/loop1       56M   56M     0 100% /snap/core18/2566
-/dev/loop0       26M   26M     0 100% /snap/amazon-ssm-agent/5656
-/dev/loop3       68M   68M     0 100% /snap/lxd/22753
-/dev/loop2       64M   64M     0 100% /snap/core20/1623
-/dev/loop4       48M   48M     0 100% /snap/snapd/16778
-/dev/xvda15     105M  5.2M  100M   5% /boot/efi
-tmpfs            97M     0   97M   0% /run/user/1000
+aws_hpc_instance = {
+  "master" = "3.19.239.84"
+  "node1" = "18.223.156.139"
+  "node2" = "3.23.115.226"
+}
+datasource_host_2_ip_out = tolist([
+  "master",
+  "node1",
+  "node2",
+])
+local_host_2_ip_out = [
+  "master",
+  "node1",
+  "node2",
+]
 ```
 
-#### **terraform destory**:
-```bash
->terraform destroy
-aws_security_group.allow_ssh_sg: Refreshing state... [id=sg-02cfa9700f8bd8c9a]
-aws_instance.aws_hpc_instance: Refreshing state... [id=i-085892a3ba0569d1d]
-
-Terraform used the selected providers to generate the following execution plan. Resource actions
-are indicated with the following symbols:
-  - destroy
-
-Terraform will perform the following actions:
-
-  # aws_instance.aws_hpc_instance will be destroyed
-  - resource "aws_instance" "aws_hpc_instance" {
-      - ami                                  = "ami-0d5bf08bc8017c83b" -> null
-      - arn                                  = "arn:aws:ec2:us-east-2:180775276220:instance/i-085892a3ba0569d1d" -> null
-      - associate_public_ip_address          = true -> null
-      - availability_zone                    = "us-east-2c" -> null
-      - cpu_core_count                       = 1 -> null
-      - cpu_threads_per_core                 = 1 -> null
-      - disable_api_stop                     = false -> null
-      - disable_api_termination              = false -> null
-      - ebs_optimized                        = false -> null
-      - get_password_data                    = false -> null
-      - hibernation                          = false -> null
-      - id                                   = "i-085892a3ba0569d1d" -> null
-      - instance_initiated_shutdown_behavior = "stop" -> null
-      - instance_state                       = "running" -> null
-      - instance_type                        = "t2.micro" -> null
-      - ipv6_address_count                   = 0 -> null
-      - ipv6_addresses                       = [] -> null
-      - key_name                             = "aws_hpc_keypair" -> null
-      - monitoring                           = false -> null
-      - primary_network_interface_id         = "eni-0ce1fdb80d82d58ed" -> null
-      - private_dns                          = "ip-172-31-35-241.us-east-2.compute.internal" -> null
-      - private_ip                           = "172.31.35.241" -> null
-      - public_dns                           = "ec2-18-222-105-68.us-east-2.compute.amazonaws.com" 
--> null
-      - public_ip                            = "18.222.105.68" -> null
-      - secondary_private_ips                = [] -> null
-      - security_groups                      = [
-          - "allow_ssh",
-        ] -> null
-      - source_dest_check                    = true -> null
-      - subnet_id                            = "subnet-0f7c2f05b0959e938" -> null
-      - tags                                 = {
-          - "Environment" = "Sandbox"
-          - "Managed"     = "IaC"
-          - "Name"        = "HPC aws instance"
-          - "OS"          = "Ubuntu 20.04"
-        } -> null
-      - tags_all                             = {
-          - "Environment" = "Sandbox"
-          - "Managed"     = "IaC"
-          - "Name"        = "HPC aws instance"
-          - "OS"          = "Ubuntu 20.04"
-        } -> null
-      - tenancy                              = "default" -> null
-      - user_data_replace_on_change          = false -> null
-      - vpc_security_group_ids               = [
-          - "sg-02cfa9700f8bd8c9a",
-        ] -> null
-
-      - capacity_reservation_specification {
-          - capacity_reservation_preference = "open" -> null
-        }
-
-      - credit_specification {
-          - cpu_credits = "standard" -> null
-        }
-
-      - enclave_options {
-          - enabled = false -> null
-        }
-
-      - maintenance_options {
-          - auto_recovery = "default" -> null
-        }
-
-      - metadata_options {
-          - http_endpoint               = "enabled" -> null
-          - http_put_response_hop_limit = 1 -> null
-          - http_tokens                 = "optional" -> null
-          - instance_metadata_tags      = "disabled" -> null
-        }
-
-      - private_dns_name_options {
-          - enable_resource_name_dns_a_record    = false -> null
-          - enable_resource_name_dns_aaaa_record = false -> null
-          - hostname_type                        = "ip-name" -> null
-        }
-
-      - root_block_device {
-          - delete_on_termination = true -> null
-          - device_name           = "/dev/sda1" -> null
-          - encrypted             = false -> null
-          - iops                  = 100 -> null
-          - tags                  = {} -> null
-          - throughput            = 0 -> null
-          - volume_id             = "vol-078b21ca488a4f326" -> null
-          - volume_size           = 8 -> null
-          - volume_type           = "gp2" -> null
-        }
-    }
-
-  # aws_security_group.allow_ssh_sg will be destroyed
-  - resource "aws_security_group" "allow_ssh_sg" {
-      - arn                    = "arn:aws:ec2:us-east-2:180775276220:security-group/sg-02cfa9700f8bd8c9a" -> null
-      - description            = "allow ssh inbond traffic" -> null
-      - egress                 = [] -> null
-      - id                     = "sg-02cfa9700f8bd8c9a" -> null
-      - ingress                = [
-          - {
-              - cidr_blocks      = [
-                  - "0.0.0.0/0",
-                ]
-              - description      = ""
-              - from_port        = 22
-              - ipv6_cidr_blocks = []
-              - prefix_list_ids  = []
-              - protocol         = "tcp"
-              - security_groups  = []
-              - self             = false
-              - to_port          = 22
-            },
-        ] -> null
-      - name                   = "allow_ssh" -> null
-      - owner_id               = "180775276220" -> null
-      - revoke_rules_on_delete = false -> null
-      - tags                   = {} -> null
-      - tags_all               = {} -> null
-      - vpc_id                 = "vpc-0f6d2d2c93e48ed29" -> null
-    }
-
-Plan: 0 to add, 0 to change, 2 to destroy.
-
-Changes to Outputs:
-  - aws_hpc_instance = "18.222.105.68" -> null
-
-Do you really want to destroy all resources?
-  Terraform will destroy all your managed infrastructure, as shown above.
-  There is no undo. Only 'yes' will be accepted to confirm.
-
-  Enter a value: yes
-
-aws_instance.aws_hpc_instance: Destroying... [id=i-085892a3ba0569d1d]
-aws_instance.aws_hpc_instance: Still destroying... [id=i-085892a3ba0569d1d, 10s elapsed]
-aws_instance.aws_hpc_instance: Still destroying... [id=i-085892a3ba0569d1d, 20s elapsed]
-aws_instance.aws_hpc_instance: Destruction complete after 30s
-aws_security_group.allow_ssh_sg: Destroying... [id=sg-02cfa9700f8bd8c9a]
-aws_security_group.allow_ssh_sg: Destruction complete after 1s
 
 Destroy complete! Resources: 2 destroyed.
 ```
