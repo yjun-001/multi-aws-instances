@@ -1,6 +1,7 @@
 # Aws HPC Cluster instances - terraform
 
-Create three aws HPC cluster node EC2 instances by using [terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs), base on hosts file
+Create three aws HPC cluster node EC2 instances by using [terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs), base on this [hosts file](https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini)
+https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini#L1-L14
 
 
 ### Prerequisite Package and its environment Setup (Windows 10 Desktop)
