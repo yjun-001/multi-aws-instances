@@ -1,6 +1,6 @@
 # Aws HPC Cluster instances - terraform
 
-Create three aws HPC cluster node EC2 instances by using [terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs), base on this [hosts file](https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini)
+Create three aws HPC EC2 cluster instances by using [terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs), base on this [hosts file](https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini)
 https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini#L1-L14
 
 
@@ -16,21 +16,20 @@ https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f
 - following commands are available:
     - **terraform init**
     - **terraform plan**
-    - **terraform graph --draw-cycle**
+    - **terraform graph --draw-cycle** (see below graph)
     - **terraform apply**
       - multiple aws instances should be created by applying successfully
     - **terraform destroy**
 
-### terraform graph
-![Alt text](https://github.com/yjun-001/multi-aws-instances/image/graphviz.svg)
-<img src=https://github.com/yjun-001/multi-aws-instances/image/graphviz.svg>
+### repos entities relationship created by terraform graph
+![Alt text](https://github.com/yjun-001/multi-aws-instances/blob/9a1c8a2e89a58682e8a4a92945c680accbe440eb/image/graphviz.svg)
 
 ### This repoistory will do 
-- create an AWS VPC with cidr_block = "10.0.0.0/16"
-- create an AWS Public subnet  with cidr_block = 10.0.1.0/24" # 254 IP addresses available in this subnet
+- create an AWS VPC with cidr_block = **"10.0.0.0/16"**
+- create an AWS Public subnet  with cidr_block = **10.0.1.0/24"** # 254 IP addresses available in this subnet
 - create an AWS Internat Gateway(IG) and route table (RT)
 - create an AWS Security Group (SG), and allow ssh incoming traffic at port 22
-- create a three nodes of EC2 cluster instances, 
+- create a three-nodes of EC2 cluster instances, 
   - assign each instances a static private IP. this IP address is the primary address of private subnet, instead of the default assigned DHCP address, [DHCP Issues](https://stackoverflow.com/questions/42666396/terraform-correctly-assigning-a-static-private-ip-to-newly-created-instance)
   - setup each hostname according to hosts file.
   - update private in master node instance, so i can ssh other nodes without password
