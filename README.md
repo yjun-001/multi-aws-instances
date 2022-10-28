@@ -30,8 +30,8 @@ https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f
 - create an AWS Internat Gateway(IG) and route table (RT)
 - create an AWS Security Group (SG), and allow ssh incoming traffic at port 22
 - create a three-nodes of EC2 cluster instances, 
-  - assign each instances a static private IP. this IP address is the primary address of private subnet, instead of the default assigned DHCP address, [DHCP Issues](https://stackoverflow.com/questions/42666396/terraform-correctly-assigning-a-static-private-ip-to-newly-created-instance)
-  - setup each hostname according to hosts file.
+  - assign each instances a static private IP. which defined in hosts file above. this IP address is to use as the primary address of private subnet, instead of the default assigned DHCP address, [DHCP Issues](https://stackoverflow.com/questions/42666396/terraform-correctly-assigning-a-static-private-ip-to-newly-created-instance)
+  - setup each hostname as well according to hosts file.
   - update private ssh key in master node instance, so it can ssh other nodes without password
 
 ### Code In Action and its output:
