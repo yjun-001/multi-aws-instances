@@ -21,10 +21,10 @@ https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f
       - multiple aws instances should be created by applying successfully
     - **terraform destroy**
 
-### repos entities relationship created by terraform graph
+### repository entities relationship created by terraform graph
 ![Alt text](https://github.com/yjun-001/multi-aws-instances/blob/9a1c8a2e89a58682e8a4a92945c680accbe440eb/image/graphviz.svg)
 
-### This repoistory will do 
+### This repository will do 
 - create an AWS VPC with cidr_block = **"10.0.0.0/16"**
 - create an AWS Public subnet  with cidr_block = **10.0.1.0/24"** # 254 IP addresses available in this subnet
 - create an AWS Internat Gateway(IG) and route table (RT)
@@ -34,7 +34,7 @@ https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f
   - setup each hostname according to hosts file.
   - update private ssh key in master node instance, so it can ssh other nodes without password
 
-### Code in Action and its Output:
+### Code In Action and its output:
 #### **terraform apply:**
 ```bash
 >terraform apply
