@@ -1,4 +1,4 @@
-# Aws HPC Cluster instances - terraform
+# AWS HPC EC2 cluster instances - create by **terraform**
 
 Create three aws HPC EC2 cluster instances by using [terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs), base on this [hosts file](https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini)
 https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f0d34767730d49/hosts.ini#L1-L14
@@ -26,7 +26,7 @@ https://github.com/yjun-001/multi-aws-instances/blob/f5afca22f5b18cb27f1be86189f
 
 ### This repository will do 
 - create an AWS VPC with cidr_block = **"10.0.0.0/16"**
-- create an AWS Public subnet  with cidr_block = **10.0.1.0/24"** # 254 IP addresses available in this subnet
+- create an AWS Public subnet with cidr_block = **10.0.1.0/24"** # 254 IP addresses available in this subnet
 - create an AWS Internat Gateway(IG) and route table (RT)
 - create an AWS Security Group (SG), and allow ssh incoming traffic at port 22
 - create a three-nodes of EC2 cluster instances, 
