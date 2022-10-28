@@ -46,3 +46,16 @@ variable "PRIVATE_KEY_PATH" {
   type    = string
   default = "~/projs/aws_hpc_keypair.pem"
 }
+
+locals {
+  provision_commands = {
+    "nodes" : [
+      "echo \"Nodes provisioning:\"",
+      "[ -f ~/.ssh/id_rsa ] && rm -f ~/.ssh/id_rsa"
+    ],
+    "master" : [
+      "echo \"Master node provisioning:\"",
+      "[ -f ~/.ssh/id_rsa ] && chmod 600 ~/.ssh/id_rsa"
+    ],
+  }
+}

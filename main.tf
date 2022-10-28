@@ -21,14 +21,6 @@ resource "aws_instance" "hpc_aws_instance" {
 
   key_name = "aws_hpc_keypair"
 
-  provisioner "local-exec" {
-    command = "echo \"The server's IP address is ${self.private_ip}\""
-  }
-
-  provisioner "remote-exec" {
-    inline = ["sudo hostnamectl set-hostname ${each.key}"]
-  }
-
   connection {
     host        = coalesce(self.public_ip, self.private_ip)
     agent       = false
@@ -37,6 +29,27 @@ resource "aws_instance" "hpc_aws_instance" {
     private_key = file(pathexpand("${var.PRIVATE_KEY_PATH}"))
   }
 
+  provisioner "local-exec" {
+    command = "echo \"The server's IP address is ${self.private_ip}\""
+  }
+
+  # first stage provisioning
+  provisioner "remote-exec" {
+    inline = ["sudo hostnamectl set-hostname ${each.key}"]
+  }
+
+  provisioner "file" {
+    source      = pathexpand("${var.PRIVATE_KEY_PATH}")
+    destination = pathexpand("/home/ubuntu/.ssh/id_rsa")
+  }
+
+  # 2nd Stage provisioning
+  provisioner "remote-exec" {
+    # As the inline parameter can't be empty, so a dummy command is added
+    inline = concat(["echo 2nd Stage Provisioning"], 
+      local.provision_commands["${each.key}" == "master" ? "master" : "nodes"])
+  }
+  
   depends_on = [
     aws_network_interface.hpc_interface
   ]
